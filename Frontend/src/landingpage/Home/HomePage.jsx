@@ -5,16 +5,18 @@ import Footer from "./Footer";
 import Navbar from "../Navbar";
 import Pricing from "./Pricing";
 import Stats from "./Stats";
+import Signup from "../signup/Signup";
 function HomePage() {
   return (
     <>
       <Navbar />
       <Hero />
       <Awards />
-      <Education />
-      <Footer />
-      <Pricing />
       <Stats />
+      <Pricing />
+      <Education />
+      <Signup />
+      <Footer />
     </>
   );
 }
