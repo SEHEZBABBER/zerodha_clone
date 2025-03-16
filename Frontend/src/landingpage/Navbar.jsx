@@ -1,11 +1,14 @@
 import { Link } from "react-router-dom";
-function Navbar() {
+function Navbar({CurrPath,setCurrPath}) {
     return (
       <nav className="navbar navbar-expand-lg bg-white shadow-sm" style={{position:"fixed",width:"100vw"}}>
         <div className="container">
           {/* Logo */}
-          <Link className="navbar-brand" to="/">
-            <img src="media/images/logo.svg" alt="Zerodha Logo" style={{ width: "120px" }} onClick={()=>window.location.href="/"}/>
+          <Link className="navbar-brand" to="/" onClick={()=>setCurrPath('/')}>
+            <img src="media/images/logo.svg" alt="Zerodha Logo" style={{ width: "120px" }} onClick={()=>{
+              window.location.href="/"
+            }}
+              />
           </Link>
   
           {/* Mobile Menu Toggle */}
@@ -25,19 +28,19 @@ function Navbar() {
           <div className="collapse navbar-collapse justify-content-end" id="navbarNav">
             <ul className="navbar-nav gap-3">
               <li className="nav-item">
-                <Link className="nav-link" to="/Signup">Signup</Link>
+                <Link className="nav-link" to="/Signup" style = {CurrPath === "/Signup" ? {color:"blue"} : {}} onClick={()=>setCurrPath('/Signup')}>Signup</Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to="/About">About</Link>
+                <Link className="nav-link" to="/About" style = {CurrPath === "/About" ? {color:"blue"} : {}} onClick={()=>setCurrPath('/About')}>About</Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to="/Products">Products</Link>
+                <Link className="nav-link" to="/Products" style = {CurrPath === "/Products" ? {color:"blue"} : {}} onClick={()=>setCurrPath('/Products')}>Products</Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to="/Pricing">Pricing</Link>
+                <Link className="nav-link" to="/Pricing" style = {CurrPath === "/Pricing" ? {color:"blue"} : {}} onClick={()=>setCurrPath('/Pricing')}>Pricing</Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to="/Support">Support</Link>
+                <Link className="nav-link" to="/Support" style = {CurrPath === "/Support" ? {color:"blue"} : {}} onClick={()=>setCurrPath('/Support')}>Support</Link>
               </li>
             </ul>
           </div>
