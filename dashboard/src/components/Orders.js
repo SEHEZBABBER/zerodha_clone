@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import "./BuyActionWindow.css";
+import "./Order.css";
 
 const Orders = () => {
   const [Order, setOrder] = useState([]);

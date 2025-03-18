@@ -14,28 +14,20 @@ import { DoughnutChart } from "./DoughnoutChart";
 const labels = watchlist.map((subArray) => subArray["name"]);
 
 const WatchList = () => {
+  const [searchTerm, setSearchTerm] = useState(""); // ✅ Added search state
+
+  const filteredWatchlist = watchlist.filter((stock) =>
+    stock.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const data = {
     labels,
     datasets: [
       {
         label: "Price",
-        data: watchlist.map((stock) => stock.price),
-        backgroundColor: [
-          "rgba(255, 99, 132, 0.5)",
-          "rgba(54, 162, 235, 0.5)",
-          "rgba(255, 206, 86, 0.5)",
-          "rgba(75, 192, 192, 0.5)",
-          "rgba(153, 102, 255, 0.5)",
-          "rgba(255, 159, 64, 0.5)",
-        ],
-        borderColor: [
-          "rgba(255, 99, 132, 1)",
-          "rgba(54, 162, 235, 1)",
-          "rgba(255, 206, 86, 1)",
-          "rgba(75, 192, 192, 1)",
-          "rgba(153, 102, 255, 1)",
-          "rgba(255, 159, 64, 1)",
-        ],
+        data: filteredWatchlist.map((stock) => stock.price),
+        backgroundColor: generateColors(filteredWatchlist.length), // ✅ Dynamic colors
+        borderColor: generateColors(filteredWatchlist.length, true),
         borderWidth: 1,
       },
     ],
@@ -48,16 +40,18 @@ const WatchList = () => {
           type="text"
           name="search"
           id="search"
-          placeholder="Search eg:infy, bse, nifty fut weekly, gold mcx"
+          placeholder="Search eg: INFY, BSE, Nifty Fut Weekly, Gold MCX"
           className="search"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <span className="counts"> {watchlist.length} / 50</span>
+        <span className="counts"> {filteredWatchlist.length} / 50</span>
       </div>
 
       <ul className="list">
-        {watchlist.map((stock, index) => {
-          return <WatchListItem stock={stock} key={index} />;
-        })}
+        {filteredWatchlist.map((stock, index) => (
+          <WatchListItem stock={stock} key={index} />
+        ))}
       </ul>
 
       <DoughnutChart data={data} />
@@ -66,6 +60,22 @@ const WatchList = () => {
 };
 
 export default WatchList;
+
+// 🎨 Dynamic Color Generator
+const generateColors = (count, border = false) => {
+  const baseColors = [
+    "#FF6384",
+    "#36A2EB",
+    "#FFCE56",
+    "#4BC0C0",
+    "#9966FF",
+    "#FF9F40",
+  ];
+  const opacity = border ? 1 : 0.5;
+  return Array.from({ length: count }, (_, i) =>
+    baseColors[i % baseColors.length].replace("1)", `${opacity})`)
+  );
+};
 
 const WatchListItem = ({ stock }) => {
   const [showWatchlistActions, setShowWatchlistActions] = useState(false);
@@ -89,7 +99,7 @@ const WatchListItem = ({ stock }) => {
           ) : (
             <KeyboardArrowUp className="up" />
           )}
-          <span className="price">{stock.price}</span>
+          <span className="price">{stock.price.toFixed(2)}</span>
         </div>
       </div>
       {showWatchlistActions && <WatchListActions uid={stock.name} />}
@@ -98,10 +108,14 @@ const WatchListItem = ({ stock }) => {
 };
 
 const WatchListActions = ({ uid }) => {
-  const generalContext = useContext(GeneralContext);
+  const generalContext = useContext(GeneralContext); // ✅ Correctly using context
 
   const handleBuyClick = () => {
-    generalContext.openBuyWindow(uid);
+    generalContext.openBuyWindow(uid); // ✅ Buy works correctly now
+  };
+
+  const handleSellClick = () => {
+    generalContext.openSellWindow(uid); // ✅ Sell opens SellActionWindow
   };
 
   return (
@@ -121,6 +135,7 @@ const WatchListActions = ({ uid }) => {
           placement="top"
           arrow
           TransitionComponent={Grow}
+          onClick={handleSellClick}
         >
           <button className="sell">Sell</button>
         </Tooltip>
