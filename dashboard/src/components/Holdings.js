@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { VerticalGraph } from "./VerticalGraph";
-import { holdings } from "../data/data";
+// import { holdings } from "../data/data";
+import axios from 'axios';
 
 const Holdings = () => {
   const [allHoldings, setAllHoldings] = useState([]);
@@ -8,7 +9,10 @@ const Holdings = () => {
   // Using local data instead of Axios request
   useEffect(() => {
     // Set data directly from local holdings
-    setAllHoldings(holdings);
+    axios.get('http://localhost:3002/allholdings').then((res)=>{
+      console.log("q");
+      setAllHoldings(res.data);
+    });
   }, []);
 
   const labels = allHoldings.map((subArray) => subArray["name"]);
