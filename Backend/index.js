@@ -40,6 +40,7 @@ app.post('/addorder',async(req,res)=>{
   let data = await HoldingModel.findOne({name:req.body.name});
   await HoldingModel.deleteMany({name:req.body.name});
   if(data){
+    if(req.body.mode === "BUY"){
     let avg_price = ((data.avg * data.qty) + (req.body.price * req.body.qty))/(data.qty+req.body.qty);
     let holdings_obj = new HoldingModel({
       name: req.body.name,
@@ -50,8 +51,25 @@ app.post('/addorder',async(req,res)=>{
       day: "+0.00%",
       });
       holdings_obj.save();
+    }
+    else{
+      let avg_price = ((data.avg * data.qty) - (req.body.price * req.body.qty))/(data.qty-req.body.qty);
+      if(data.qty - req.body.qty < 0)avg_price = req.body.price;
+      if(data.qty - req.body.qty != 0){
+      let holdings_obj = new HoldingModel({
+        name: req.body.name,
+        qty: data.qty - req.body.qty,
+        avg: avg_price,
+        price: req.body.price,
+        net: "+0.00%",
+        day: "+0.00%",
+        });
+        holdings_obj.save();
+      }
+    }
   }
   else{
+    if(req.body.mode === "BUY"){
     let holdings_obj = new HoldingModel({
     name: req.body.name,
     qty: req.body.qty,
@@ -61,6 +79,18 @@ app.post('/addorder',async(req,res)=>{
     day: "+0.00%",
     });
     holdings_obj.save();
+  }
+  else{
+    let holdings_obj = new HoldingModel({
+      name: req.body.name,
+      qty: -req.body.qty,
+      avg: req.body.price,
+      price: req.body.price,
+      net: "+0.00%",
+      day: "+0.00%",
+      });
+      holdings_obj.save();
+  }
   }
 });
 app.get('/allpositions',async(req,res)=>{
