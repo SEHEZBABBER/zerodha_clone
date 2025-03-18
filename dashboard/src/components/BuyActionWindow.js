@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 import GeneralContext from "./GeneralContext";
 
+import axios from 'axios';
 import "./BuyActionWindow.css";
 
 const BuyActionWindow = ({ uid }) => {
@@ -18,12 +19,7 @@ const BuyActionWindow = ({ uid }) => {
       mode: "BUY",
     };
 
-    console.log("New Order Placed:", newOrder);
-
-    // Optional: Store order in localStorage if needed
-    const orders = JSON.parse(localStorage.getItem("orders")) || [];
-    orders.push(newOrder);
-    localStorage.setItem("orders", JSON.stringify(orders));
+    axios.post('http://localhost:3002/addorder',newOrder);
 
     // Close buy window after placing order
     GeneralContext.closeBuyWindow();
