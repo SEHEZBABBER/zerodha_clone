@@ -1,8 +1,8 @@
-import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./landingpage/Home/HomePage";
 import Signup from "./landingpage/signup/Signup";
+import Login from "./landingpage/signup/Login";
 import About from "./landingpage/about/About";
 import PricingPage from "./landingpage/pricing/PricingPage";
 import ProductPage from "./landingpage/products/ProductPage";
@@ -11,16 +11,19 @@ import Navbar from "./landingpage/Navbar";
 import Footer from "./landingpage/footer";
 import NotFound from "./landingpage/NotFound";
 import "./index.css";
+import { useUserContext } from "./UserContext";
+import { UserProvider } from "./UserContext";
 
 function App() {
-  let [CurrPath,setCurrPath] = useState("/") 
   return (
     <>
-      <Navbar  CurrPath={CurrPath} setCurrPath={setCurrPath}/>
+    <UserProvider>
+      <Navbar/>
       <div style={{ paddingTop:"80px" }} />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/Signup" element={<Signup />} />
+        <Route path="/Login" element={<Login />} />
         <Route path="/About" element={<About />} />
         <Route path="/Products" element={<ProductPage />} />
         <Route path="/Pricing" element={<PricingPage />} />
@@ -28,6 +31,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
+    </UserProvider>
     </>
   );
 }

@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
-function Navbar({CurrPath,setCurrPath}) {
+import { useUserContext } from "../UserContext";
+function Navbar() {
+    const {CurrPath,setCurrPath} = useUserContext();
     return (
       <nav className="navbar navbar-expand-lg bg-white shadow-sm" style={{position:"fixed",width:"100vw"}}>
         <div className="container">
@@ -28,7 +30,7 @@ function Navbar({CurrPath,setCurrPath}) {
           <div className="collapse navbar-collapse justify-content-end" id="navbarNav">
             <ul className="navbar-nav gap-3">
               <li className="nav-item">
-                <Link className="nav-link" to="/Signup" style = {CurrPath === "/Signup" ? {color:"blue"} : {}} onClick={()=>setCurrPath('/Signup')}>Signup</Link>
+                {CurrPath === '/Signup' ? (<Link className="nav-link" to="/Login" style = {CurrPath === "/Login" ? {color:"blue"} : {}} onClick={()=>setCurrPath('/Login')}>Login</Link>) : (<Link className="nav-link" to="/Signup" style = {CurrPath === "/Signup" ? {color:"blue"} : {}} onClick={()=>setCurrPath('/Signup')}>Signup</Link>)}
               </li>
               <li className="nav-item">
                 <Link className="nav-link" to="/About" style = {CurrPath === "/About" ? {color:"blue"} : {}} onClick={()=>setCurrPath('/About')}>About</Link>
