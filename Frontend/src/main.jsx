@@ -11,7 +11,6 @@ import Navbar from "./landingpage/Navbar";
 import Footer from "./landingpage/footer";
 import NotFound from "./landingpage/NotFound";
 import "./index.css";
-import { useUserContext } from "./UserContext";
 import { UserProvider } from "./UserContext";
 
 function App() {
