@@ -1,36 +1,63 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-
+import React, { useState, useEffect, useContext } from "react";
 import GeneralContext from "./GeneralContext";
-
-import axios from 'axios';
+import axios from "axios";
 import "./BuyActionWindow.css";
 
 const BuyActionWindow = ({ uid }) => {
   const [stockQuantity, setStockQuantity] = useState(1);
   const [stockPrice, setStockPrice] = useState(0.0);
+  const { user_info, closeBuyWindow } = useContext(GeneralContext);
 
-  const handleBuyClick = () => {
-    // Simulating a new order without axios
-    const newOrder = {
-      name: uid,
-      qty: stockQuantity,
-      price: stockPrice,
-      mode: "BUY",
-    };
+  // ✅ Check for authentication
+  useEffect(() => {
+    if (!user_info) {
+      window.location.href = "/error"; // Redirect to error page if not authorized
+    }
+  }, [user_info]);
 
-    axios.post('http://localhost:3002/addorder',newOrder);
+  if (!user_info) {
+    return null; // Stop rendering if not authorized
+  }
 
-    // Close buy window after placing order
-    GeneralContext.closeBuyWindow();
+  // ✅ Handle buy click to post order
+  const handleBuyClick = async () => {
+    try {
+      const newOrder = {
+        name: uid,
+        qty: stockQuantity,
+        price: stockPrice,
+        mode: "BUY",
+      };
+
+      // ✅ Post order with axios
+      const res = await axios.post("http://localhost:3002/addorder", newOrder, {
+        withCredentials: true,
+      });
+
+      if (res.status === 200 || res.status === 201) {
+        alert("Order placed successfully!");
+        closeBuyWindow(); // ✅ Close buy window after successful order
+      }
+    } catch (err) {
+      console.error("Error placing order:", err);
+      alert("Failed to place order. Please try again.");
+    }
   };
 
+  // ✅ Handle cancel click to close window
   const handleCancelClick = () => {
-    GeneralContext.closeBuyWindow();
+    closeBuyWindow(); // Close the buy window
   };
 
   return (
     <div className="container" id="buy-window" draggable="true">
+      {/* Header - Zerodha Style */}
+      <div className="header">
+        <h3>Buy Order</h3>
+        <button onClick={handleCancelClick}>✕</button>
+      </div>
+
+      {/* Order Form */}
       <div className="regular-order">
         <div className="inputs">
           <fieldset>
@@ -41,6 +68,7 @@ const BuyActionWindow = ({ uid }) => {
               id="qty"
               onChange={(e) => setStockQuantity(parseInt(e.target.value))}
               value={stockQuantity}
+              min="1"
             />
           </fieldset>
           <fieldset>
@@ -52,20 +80,22 @@ const BuyActionWindow = ({ uid }) => {
               step="0.05"
               onChange={(e) => setStockPrice(parseFloat(e.target.value))}
               value={stockPrice}
+              min="0.01"
             />
           </fieldset>
         </div>
       </div>
 
+      {/* Buttons and Margin Info */}
       <div className="buttons">
-        <span>Margin required ₹{(stockQuantity * stockPrice).toFixed(2)}</span>
-        <div>
-          <Link className="btn btn-blue" onClick={handleBuyClick}>
+        <span>Margin required: ₹{(stockQuantity * stockPrice).toFixed(2)}</span>
+        <div className="btn-group">
+          <button className="btn btn-blue" onClick={handleBuyClick}>
             Buy
-          </Link>
-          <Link to="" className="btn btn-grey" onClick={handleCancelClick}>
+          </button>
+          <button className="btn btn-grey" onClick={handleCancelClick}>
             Cancel
-          </Link>
+          </button>
         </div>
       </div>
     </div>

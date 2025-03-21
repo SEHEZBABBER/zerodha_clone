@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import "./Order.css";
+import GeneralContext from "./GeneralContext";
 
 const Orders = () => {
   const [Order, setOrder] = useState([]);
-
+  const {user_info} = useContext(GeneralContext);
   // Fetch order data from backend
   useEffect(() => {
     axios.get("http://localhost:3002/allorders").then((res) => {
+      if(!user_info)window.location.href = '/error';
       setOrder(res.data);
     });
   }, []);

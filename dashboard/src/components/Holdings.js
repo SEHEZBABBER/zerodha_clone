@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { VerticalGraph } from "./VerticalGraph";
 // import { holdings } from "../data/data";
 import axios from 'axios';
+import GeneralContext from "./GeneralContext";
 
 const Holdings = () => {
   const [allHoldings, setAllHoldings] = useState([]);
-
+  const {user_info} = useContext(GeneralContext)
   // Using local data instead of Axios request
   useEffect(() => {
     // Set data directly from local holdings
     axios.get('http://localhost:3002/allholdings').then((res)=>{
-      console.log("q");
+      if(!user_info)window.location.href = '/error';
       setAllHoldings(res.data);
     });
   }, []);

@@ -1,23 +1,38 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import BuyActionWindow from "./BuyActionWindow";
 import SellActionWindow from "./SellActionWindow"; // ✅ Import Sell Window
 
 const GeneralContext = React.createContext({
   openBuyWindow: (uid) => {},
   closeBuyWindow: () => {},
-  openSellWindow: (uid) => {}, // ✅ Add Sell methods to context
+  openSellWindow: (uid) => {},
   closeSellWindow: () => {},
+  selectedMenu: 0,
+  setSelectedMenu: () => {},
+  user_info: null,
+  setuser_info: () => {},
 });
 
 export const GeneralContextProvider = (props) => {
   const [isBuyWindowOpen, setIsBuyWindowOpen] = useState(false);
-  const [isSellWindowOpen, setIsSellWindowOpen] = useState(false); // ✅ New state for Sell Window
+  const [isSellWindowOpen, setIsSellWindowOpen] = useState(false);
   const [selectedStockUID, setSelectedStockUID] = useState("");
   const [selectedMenu, setSelectedMenu] = useState(0);
-  const [user_info,setuser_info] = useState(null);
+  const [user_info, setuser_info] = useState(null);
 
-
+  // ✅ Fetch user data on page load/refresh
+  useEffect(() => {
+    axios
+      .get("http://localhost:3002/userdata", { withCredentials: true })
+      .then((res) => {
+        setuser_info(res.data); // ✅ Set user info after fetching
+      })
+      .catch((err) => {
+        console.error("Error fetching user data:", err);
+        setuser_info(null); // Reset if error or not authorized
+      });
+  }, []); // ✅ Only run on page load
 
   // ✅ Handle opening Buy Window
   const handleOpenBuyWindow = (uid) => {
@@ -48,18 +63,17 @@ export const GeneralContextProvider = (props) => {
       value={{
         openBuyWindow: handleOpenBuyWindow,
         closeBuyWindow: handleCloseBuyWindow,
-        openSellWindow: handleOpenSellWindow, // ✅ Added Sell to context
+        openSellWindow: handleOpenSellWindow,
         closeSellWindow: handleCloseSellWindow,
-        selectedMenu:selectedMenu,
-        setSelectedMenu:setSelectedMenu,
-        user_info:user_info,
-        setuser_info:setuser_info,
+        selectedMenu: selectedMenu,
+        setSelectedMenu: setSelectedMenu,
+        user_info: user_info,
+        setuser_info: setuser_info,
       }}
     >
       {props.children}
       {isBuyWindowOpen && <BuyActionWindow uid={selectedStockUID} />}
-      {isSellWindowOpen && <SellActionWindow uid={selectedStockUID} />}{" "}
-      {/* ✅ Render Sell Window */}
+      {isSellWindowOpen && <SellActionWindow uid={selectedStockUID} />}
     </GeneralContext.Provider>
   );
 };
