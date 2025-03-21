@@ -2,7 +2,11 @@ import { Link } from "react-router-dom";
 import { useUserContext } from "../../UserContext";
 import axios from "axios";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 function Signup() {
+    const navigate = useNavigate();
+  const { setuser_info } = useUserContext();
   const { CurrPath, setCurrPath } = useUserContext();
   let [obj, setobj] = useState({
     username: "",
@@ -12,9 +16,20 @@ function Signup() {
   function handleSubmit(e) {
     console.log("q");
     e.preventDefault();
-    axios.post("http://localhost:3002/register", obj ,{withCredentials:true})
-    .then((res)=>console.log(res))
-    .catch((err)=>console.log(err));
+    axios
+      .post("http://localhost:3002/register", obj, { withCredentials: true })
+      .then(() => {
+        axios
+          .get("http://localhost:3002/userdata",{withCredentials:true})
+          .then(()=>{
+            axios.get("http://localhost:3002/userdata",{withCredentials:true})
+            .then((res) => {
+                setuser_info(res.data);
+                navigate('/');
+              });
+        })
+      })
+      .catch((err) => console.log(err));
   }
   return (
     <div className="signup d-flex flex-row jutify-content-center align-items-center mt-5">
@@ -29,7 +44,7 @@ function Signup() {
           action="/"
           className="d-flex flex-column justify-content-center align-items-center text-center col-6 text-center p-5"
           style={{ height: "100%", width: "30vw" }}
-          onSubmit={(e)=>handleSubmit(e)}
+          onSubmit={(e) => handleSubmit(e)}
         >
           <input
             type="text"
@@ -39,7 +54,7 @@ function Signup() {
             className="p-2 ps-4 w-75 mb-3"
             style={{ borderRadius: "20px" }}
             value={obj.username}
-            onChange={(e) => setobj({...obj,username:e.target.value})}
+            onChange={(e) => setobj({ ...obj, username: e.target.value })}
           />
           <input
             type="text"
@@ -49,7 +64,7 @@ function Signup() {
             className="p-2 ps-4 w-75 mb-3"
             style={{ borderRadius: "20px" }}
             value={obj.email}
-            onChange={(e)=>setobj({...obj,email:e.target.value})}
+            onChange={(e) => setobj({ ...obj, email: e.target.value })}
           />
           <input
             type="password"
@@ -59,7 +74,7 @@ function Signup() {
             className="p-2 ps-4 w-75 mb-3"
             style={{ borderRadius: "20px" }}
             value={obj.password}
-            onChange={(e)=>setobj({...obj,password:e.target.value})}
+            onChange={(e) => setobj({ ...obj, password: e.target.value })}
           />
           <Link
             to="/Login"
@@ -73,7 +88,7 @@ function Signup() {
             type="submit"
             className="btn btn-primary p-2 ps-4 w-75 mb-3"
             style={{ borderRadius: "20px" }}
-            onClick={(e)=>handleSubmit(e)}
+            onClick={(e) => handleSubmit(e)}
           >
             Signup
           </button>

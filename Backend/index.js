@@ -11,6 +11,8 @@ const cors = require('cors');
 const UserModel = require('./models/UserModels');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const cookieparser = require('cookie-parser');
+app.use(cookieparser());
 app.use(bodyparser.json());
 app.use(cors({
   origin:"http://localhost:5173",
@@ -114,7 +116,7 @@ app.post('/register',async(req,res)=>{
     orders:[],
   });
   await newuser.save();
-  let token = jwt.sign({user:newuser},"asfasdfasdfsad",{expiresIn:"30h"});
+  let token = jwt.sign({username:newuser.username,email:newuser.email,holdings:newuser.holdings,orders:newuser.holdings},"asfasdfasdfsad",{expiresIn:"30h"});
   res.cookie('token',token,{
     httpOnly:true,
     secure:true,
@@ -125,15 +127,26 @@ app.post('/register',async(req,res)=>{
 app.post('/login',async(req,res)=>{
   let {username,password} = req.body;
   if(!username || !password)return res.status(400).json({message:"Incomplete Credentials"});
-  let check_user_present = await UserModel.find({username:username});
+  let check_user_present = await UserModel.findOne({username:username});
   if(!check_user_present)return res.status(400).json({message:"user does not exists"});
   const isMatch = bcrypt.compare(password,check_user_present.password);
   if(!isMatch)return res.status(400).json({message:"username and password dont match"});
-  let token = jwt.sign({user:req.body},"asfasdfasdfsad",{expiresIn:"30h"});
+  let token = jwt.sign({username:check_user_present.username,email:check_user_present.email,holdings:check_user_present.holdings,orders:check_user_present.holdings},"asfasdfasdfsad",{expiresIn:"30h"});
   res.cookie('token',token,{
     httpOnly:true,
     secure:true,
     maxAge:30*60*60*1000,
   });
   res.status(200).json({message:"logged in successfully"});
+});
+app.get('/userdata',async(req,res)=>{
+  const token = req.cookies.token;
+  req.user = jwt.verify(token,"asfasdfasdfsad");
+  res.status(200).json({username:req.user.username,email:req.user.email,holdings:req.user.holdings,orders:req.user.orders});
+});
+app.get('/logout',(req,res)=>{
+  res.clearCookie('token',{
+    httpOnly:true,
+  });
+  res.status(200).json({message:"Logout Successful"});
 });

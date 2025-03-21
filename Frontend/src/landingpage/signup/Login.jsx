@@ -1,17 +1,27 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useUserContext } from "../../UserContext";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 function Login() {
   const { CurrPath, setCurrPath } = useUserContext();
+  const {setuser_info} = useUserContext();
+
   const [obj, setobj] = useState({
     username: "",
     password: "",
   });
+  const navigate = useNavigate();
   function handleSubmit(e) {
     e.preventDefault();
     axios.post("http://localhost:3002/login", obj,{withCredentials:true})
-    .then((res)=>console.log(res))
+    .then(()=>{
+        axios.get("http://localhost:3002/userdata",{withCredentials:true})
+        .then((res) => {
+            setuser_info(res.data);
+            navigate('/');
+          });
+    })
     .catch((err)=>console.log(err));
   }
   return (
