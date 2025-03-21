@@ -6,11 +6,18 @@ const uri = process.env.MONGO_URL;
 const mongoose = require("mongoose");
 const HoldingModel = require('./models/HoldingModel');
 const bodyparser = require('body-parser');
-const PositionModel = require('./models/PositonModel');
 const OrderModel = require('./models/OrderModel');
 const cors = require('cors');
+const UserModel = require('./models/UserModels');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 app.use(bodyparser.json());
-app.use(cors());
+app.use(cors({
+  origin:"http://localhost:5173",
+  credentials:true,
+}));
+app.use(express.json());
+app.use(express.urlencoded({extended:true}));
 async function main() {
   await mongoose
     .connect(uri)
@@ -93,7 +100,40 @@ app.post('/addorder',async(req,res)=>{
   }
   }
 });
-app.get('/allpositions',async(req,res)=>{
-  let data = await PositionModel.find({});
-  res.json(data);
+app.post('/register',async(req,res)=>{
+  let {username,email,password} = req.body;
+  if(!username || ! email || ! password)res.status(400).json({message:"missing credentails"});
+  let check_user_present = await UserModel.findOne({email:email});
+  if(!email.includes('@'))return res.status(400),json({message:"email not valud"});
+  if(check_user_present)return res.status(400).json({message:"user already exists"});
+  let newuser = new UserModel({
+    username:username,
+    email:email,
+    password:password,
+    holdings:[],
+    orders:[],
+  });
+  await newuser.save();
+  let token = jwt.sign({user:newuser},"asfasdfasdfsad",{expiresIn:"30h"});
+  res.cookie('token',token,{
+    httpOnly:true,
+    secure:true,
+    maxAge:30*60*60*1000,
+  });
+  res.status(200).json({message:"login successful"});
+});
+app.post('/login',async(req,res)=>{
+  let {username,password} = req.body;
+  if(!username || !password)return res.status(400).json({message:"Incomplete Credentials"});
+  let check_user_present = await UserModel.find({username:username});
+  if(!check_user_present)return res.status(400).json({message:"user does not exists"});
+  const isMatch = bcrypt.compare(password,check_user_present.password);
+  if(!isMatch)return res.status(400).json({message:"username and password dont match"});
+  let token = jwt.sign({user:req.body},"asfasdfasdfsad",{expiresIn:"30h"});
+  res.cookie('token',token,{
+    httpOnly:true,
+    secure:true,
+    maxAge:30*60*60*1000,
+  });
+  res.status(200).json({message:"logged in successfully"});
 });
