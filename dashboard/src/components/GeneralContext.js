@@ -14,6 +14,9 @@ export const GeneralContextProvider = (props) => {
   const [isBuyWindowOpen, setIsBuyWindowOpen] = useState(false);
   const [isSellWindowOpen, setIsSellWindowOpen] = useState(false); // ✅ New state for Sell Window
   const [selectedStockUID, setSelectedStockUID] = useState("");
+  const [selectedMenu, setSelectedMenu] = useState(0);
+  const [user_info,setuser_info] = useState(null);
+
 
 
   // ✅ Handle opening Buy Window
@@ -47,6 +50,10 @@ export const GeneralContextProvider = (props) => {
         closeBuyWindow: handleCloseBuyWindow,
         openSellWindow: handleOpenSellWindow, // ✅ Added Sell to context
         closeSellWindow: handleCloseSellWindow,
+        selectedMenu:selectedMenu,
+        setSelectedMenu:setSelectedMenu,
+        user_info:user_info,
+        setuser_info:setuser_info,
       }}
     >
       {props.children}

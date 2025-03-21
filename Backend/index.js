@@ -15,7 +15,7 @@ const cookieparser = require('cookie-parser');
 app.use(cookieparser());
 app.use(bodyparser.json());
 app.use(cors({
-  origin:"http://localhost:5173",
+  origin: ["http://localhost:3000", "http://localhost:5173"],
   credentials:true,
 }));
 app.use(express.json());
@@ -104,9 +104,9 @@ app.post('/addorder',async(req,res)=>{
 });
 app.post('/register',async(req,res)=>{
   let {username,email,password} = req.body;
-  if(!username || ! email || ! password)res.status(400).json({message:"missing credentails"});
+  if(!username || ! email || ! password)return res.status(400).json({message:"missing credentails"});
   let check_user_present = await UserModel.findOne({email:email});
-  if(!email.includes('@'))return res.status(400),json({message:"email not valud"});
+  if(!email.includes('@'))return res.status(400).json({message:"email not valid"});
   if(check_user_present)return res.status(400).json({message:"user already exists"});
   let newuser = new UserModel({
     username:username,

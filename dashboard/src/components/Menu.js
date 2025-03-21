@@ -1,45 +1,66 @@
-import React, { useState } from "react";
-
 import { Link } from "react-router-dom";
+import GeneralContext from "./GeneralContext";
+import { useContext } from "react";
+import axios from "axios";
 
 const Menu = () => {
-  const [selectedMenu, setSelectedMenu] = useState(0);
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-
-  const handleMenuClick = (index) => {
-    setSelectedMenu(index);
-  };
-
-  const handleProfileClick = (index) => {
-    setIsProfileDropdownOpen(!isProfileDropdownOpen);
-  };
-
-  const menuClass = "menu";
-  const activeMenuClass = "menu selected";
-
+  // ✅ Correct context destructuring
+  const { selectedMenu, setSelectedMenu, user_info, setuser_info } =
+    useContext(GeneralContext);
+  function handleLogout() {
+    axios.get("http://localhost:3002/logout",{withCredentials:true})
+    setuser_info(null);
+    setSelectedMenu(null);
+  }
   return (
     <div className="menu-container">
-      <img src="logo.png" style={{ width: "50px" }} alt="logo_image"/>
+      <img src="logo.png" style={{ width: "50px" }} alt="logo_image" />
       <div className="menus">
         <ul>
-        <li>
-            <Link
-              style={{ textDecoration: "none" }}
-              to="/Signup"
-              onClick={() => handleMenuClick(0)}
-            >
-              <p className={selectedMenu === 0 ? activeMenuClass : menuClass}>
-                Signup
-              </p>
-            </Link>
+          <li>
+            {user_info ? (
+              <button onClick={handleLogout}>LogOut</button>
+            ) : selectedMenu === 7 ? (
+              <Link
+                style={{ textDecoration: "none" }}
+                to="/Login"
+                onClick={() => setSelectedMenu(7)}
+              >
+                <p
+                  style={
+                    selectedMenu === 7 ? { color: "blue" } : { color: "black" }
+                  }
+                >
+                  Login
+                </p>
+              </Link>
+            ) : (
+              <Link
+                style={{ textDecoration: "none" }}
+                to="/Signup"
+                onClick={() => setSelectedMenu(0)}
+              >
+                <p
+                  style={
+                    selectedMenu === 0 ? { color: "blue" } : { color: "black" }
+                  }
+                >
+                  Signup
+                </p>
+              </Link>
+            )}
           </li>
           <li>
             <Link
               style={{ textDecoration: "none" }}
               to="/"
-              onClick={() => handleMenuClick(1)}
+              onClick={() => setSelectedMenu(1)}
             >
-              <p className={selectedMenu === 1 ? activeMenuClass : menuClass}>
+              <p
+                style={
+                  selectedMenu === 1 ? { color: "blue" } : { color: "black" }
+                }
+              >
                 Dashboard
               </p>
             </Link>
@@ -48,9 +69,13 @@ const Menu = () => {
             <Link
               style={{ textDecoration: "none" }}
               to="/orders"
-              onClick={() => handleMenuClick(2)}
+              onClick={() => setSelectedMenu(2)}
             >
-              <p className={selectedMenu === 2 ? activeMenuClass : menuClass}>
+              <p
+                style={
+                  selectedMenu === 2 ? { color: "blue" } : { color: "black" }
+                }
+              >
                 Orders
               </p>
             </Link>
@@ -59,9 +84,13 @@ const Menu = () => {
             <Link
               style={{ textDecoration: "none" }}
               to="/holdings"
-              onClick={() => handleMenuClick(3)}
+              onClick={() => setSelectedMenu(3)}
             >
-              <p className={selectedMenu === 3 ? activeMenuClass : menuClass}>
+              <p
+                style={
+                  selectedMenu === 3 ? { color: "blue" } : { color: "black" }
+                }
+              >
                 Holdings
               </p>
             </Link>
@@ -70,9 +99,13 @@ const Menu = () => {
             <Link
               style={{ textDecoration: "none" }}
               to="/positions"
-              onClick={() => handleMenuClick(4)}
+              onClick={() => setSelectedMenu(4)}
             >
-              <p className={selectedMenu === 4 ? activeMenuClass : menuClass}>
+              <p
+                style={
+                  selectedMenu === 4 ? { color: "blue" } : { color: "black" }
+                }
+              >
                 Positions
               </p>
             </Link>
@@ -80,10 +113,14 @@ const Menu = () => {
           <li>
             <Link
               style={{ textDecoration: "none" }}
-              to="funds"
-              onClick={() => handleMenuClick(5)}
+              to="/funds"
+              onClick={() => setSelectedMenu(5)}
             >
-              <p className={selectedMenu === 5 ? activeMenuClass : menuClass}>
+              <p
+                style={
+                  selectedMenu === 5 ? { color: "blue" } : { color: "black" }
+                }
+              >
                 Funds
               </p>
             </Link>
@@ -92,18 +129,24 @@ const Menu = () => {
             <Link
               style={{ textDecoration: "none" }}
               to="/apps"
-              onClick={() => handleMenuClick(6)}
+              onClick={() => setSelectedMenu(6)}
             >
-              <p className={selectedMenu === 6 ? activeMenuClass : menuClass}>
+              <p
+                style={
+                  selectedMenu === 6 ? { color: "blue" } : { color: "black" }
+                }
+              >
                 Apps
               </p>
             </Link>
           </li>
         </ul>
         <hr />
-        <div className="profile" onClick={handleProfileClick}>
+        <div className="profile">
           <div className="avatar">ZU</div>
-          <p className="username">USERID</p>
+          <p className="username">
+            {user_info ? `${user_info.username}` : "USER_ID"}
+          </p>
         </div>
       </div>
     </div>

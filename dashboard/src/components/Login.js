@@ -1,7 +1,32 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import GeneralContext from "./GeneralContext";
+import { useContext, useState } from "react";
+import axios from "axios";
 
-function Signup() {
+function Login() {
+  const navigate = useNavigate();
+  const { setSelectedMenu } = useContext(GeneralContext);
+  const [user, setuser] = useState({
+    username: "",
+    password: "",
+  });
+  const [error, seterror] = useState(null);
+  const { setuser_info } = useContext(GeneralContext);
+  function handleSubmit(e) {
+    e.preventDefault();
+    axios
+      .post("http://localhost:3002/login", user, { withCredentials: true })
+      .then((res) => {
+        axios
+          .get("http://localhost:3002/userdata", { withCredentials: true })
+          .then((res) => {
+            setuser_info(res.data);
+          });
+        navigate('/');
+      })
+      .catch((err) => seterror(err.response.data.message));
+  }
   return (
     <div
       className="d-flex justify-content-center align-items-center vh-100"
@@ -12,17 +37,20 @@ function Signup() {
         style={{ width: "400px", borderRadius: "20px" }}
       >
         <h2 className="text-center mb-4">Create an Account</h2>
-        <form>
+        <form onSubmit={(e) => handleSubmit(e)}>
           {/* Username */}
           <div className="mb-3">
             <label htmlFor="username" className="form-label fw-bold">
               Username
             </label>
             <input
+              name="username"
               type="text"
               className="form-control"
               id="username"
               placeholder="Enter your username"
+              value={user.username}
+              onChange={(e) => setuser({ ...user, username: e.target.value })}
             />
           </div>
 
@@ -34,40 +62,40 @@ function Signup() {
               Password
             </label>
             <input
+              name="password"
               type="password"
               className="form-control"
               id="password"
               placeholder="Create a password"
+              value={user.password}
+              onChange={(e) => setuser({ ...user, password: e.target.value })}
             />
           </div>
-
-          {/* Confirm Password */}
-          <div className="mb-3">
-            <label htmlFor="confirmPassword" className="form-label fw-bold">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              className="form-control"
-              id="confirmPassword"
-              placeholder="Confirm your password"
-            />
-          </div>
-
+          {error ? (
+            <div className="mb-3">
+              <p style={{ color: "red" }}>{error}</p>
+            </div>
+          ) : (
+            <div></div>
+          )}
           {/* Sign Up Button */}
           <button
             type="submit"
             className="btn btn-primary w-100 mb-3"
             style={{ borderRadius: "20px" }}
+            onClick={(e) => handleSubmit(e)}
           >
-            Sign Up
+            Login
           </button>
-
           {/* Already have an account? */}
           <div className="text-center">
             <p>
               Dont have an account?{" "}
-              <Link to="/Signup" className="text-primary fw-bold">
+              <Link
+                to="/Signup"
+                className="text-primary fw-bold"
+                onClick={() => setSelectedMenu(0)}
+              >
                 Sign up
               </Link>
             </p>
@@ -78,4 +106,4 @@ function Signup() {
   );
 }
 
-export default Signup;
+export default Login;
