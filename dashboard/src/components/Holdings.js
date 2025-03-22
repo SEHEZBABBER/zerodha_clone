@@ -10,11 +10,11 @@ const Holdings = () => {
   // Using local data instead of Axios request
   useEffect(() => {
     // Set data directly from local holdings
-    axios.get('http://localhost:3002/allholdings').then((res)=>{
-      if(!user_info)window.location.href = '/error';
+    if(!user_info)window.location.href = '/error';
+    axios.get('http://localhost:3002/allholdings',{withCredentials:true}).then((res)=>{
       setAllHoldings(res.data);
     });
-  }, []);
+  },);
 
   const labels = allHoldings.map((subArray) => subArray["name"]);
 

@@ -31,15 +31,22 @@ app.listen(port, () => {
   console.log("Listeing on port 3002");
 });
 app.get('/allholdings',async(req,res)=>{
-  let data = await HoldingModel.find({});
+  const token = req.cookies.token;
+  if(!token)return res.status(400).json({message:"you're not logged in"});
+  req.user = jwt.verify(token,"asfasdfasdfsad");
+  let data = await HoldingModel.find({user:req.user._id});
   res.json(data);
 });
 app.get('/allorders',async(req,res)=>{
-  let data = await OrderModel.find({});
+  const token = req.cookies.token;
+  if(!token)return res.status(400).json({message:"you're not logged in"});
+  req.user = jwt.verify(token,"asfasdfasdfsad");
+  let data = await OrderModel.find({user:req.user._id});
   res.json(data);
 });
 app.post('/addorder',async(req,res)=>{
   let obj = new OrderModel({
+    user:req.body.user,
     name:req.body.name,
     qty:req.body.qty,
     price:req.body.price,
@@ -52,6 +59,7 @@ app.post('/addorder',async(req,res)=>{
     if(req.body.mode === "BUY"){
     let avg_price = ((data.avg * data.qty) + (req.body.price * req.body.qty))/(data.qty+req.body.qty);
     let holdings_obj = new HoldingModel({
+      user:req.body.user,
       name: req.body.name,
       qty: data.qty + req.body.qty,
       avg: avg_price,
@@ -66,6 +74,7 @@ app.post('/addorder',async(req,res)=>{
       if(data.qty - req.body.qty < 0)avg_price = req.body.price;
       if(data.qty - req.body.qty != 0){
       let holdings_obj = new HoldingModel({
+        user:req.body.user,
         name: req.body.name,
         qty: data.qty - req.body.qty,
         avg: avg_price,
@@ -80,6 +89,7 @@ app.post('/addorder',async(req,res)=>{
   else{
     if(req.body.mode === "BUY"){
     let holdings_obj = new HoldingModel({
+    user:req.body.user,
     name: req.body.name,
     qty: req.body.qty,
     avg: req.body.price,
@@ -91,6 +101,7 @@ app.post('/addorder',async(req,res)=>{
   }
   else{
     let holdings_obj = new HoldingModel({
+      user:req.body.user,
       name: req.body.name,
       qty: -req.body.qty,
       avg: req.body.price,
@@ -101,6 +112,14 @@ app.post('/addorder',async(req,res)=>{
       holdings_obj.save();
   }
   }
+  let order_id = await OrderModel.findOne({name:req.body.name})._id;
+  let user_id = await UserModel.findOne({name:req.body.name})._id;
+  const token = req.cookies.token;
+  let loggedin_user = jwt.verify(token,"asfasdfasdfsad");
+  let newuser = await UserModel.findOne({_id:loggedin_user._id});
+  newuser.holdings.push(order_id);
+  newuser.orders.push(user_id);
+  await UserModel.replaceOne({_id:loggedin_user._id},newuser);
 });
 app.post('/register',async(req,res)=>{
   let {username,email,password} = req.body;
@@ -116,7 +135,8 @@ app.post('/register',async(req,res)=>{
     orders:[],
   });
   await newuser.save();
-  let token = jwt.sign({username:newuser.username,email:newuser.email,holdings:newuser.holdings,orders:newuser.holdings},"asfasdfasdfsad",{expiresIn:"30h"});
+  let temp_user = await UserModel.findOne({email:newuser.email});
+  let token = jwt.sign({_id:temp_user._id,username:newuser.username,email:newuser.email,holdings:newuser.holdings,orders:newuser.holdings},"asfasdfasdfsad",{expiresIn:"30h"});
   res.cookie('token',token,{
     httpOnly:true,
     secure:true,
@@ -131,7 +151,7 @@ app.post('/login',async(req,res)=>{
   if(!check_user_present)return res.status(400).json({message:"user does not exists"});
   const isMatch = bcrypt.compare(password,check_user_present.password);
   if(!isMatch)return res.status(400).json({message:"username and password dont match"});
-  let token = jwt.sign({username:check_user_present.username,email:check_user_present.email,holdings:check_user_present.holdings,orders:check_user_present.holdings},"asfasdfasdfsad",{expiresIn:"30h"});
+  let token = jwt.sign({_id:check_user_present._id,username:check_user_present.username,email:check_user_present.email,holdings:check_user_present.holdings,orders:check_user_present.holdings},"asfasdfasdfsad",{expiresIn:"30h"});
   res.cookie('token',token,{
     httpOnly:true,
     secure:true,
@@ -141,8 +161,9 @@ app.post('/login',async(req,res)=>{
 });
 app.get('/userdata',async(req,res)=>{
   const token = req.cookies.token;
+  if(!token)return res.status(400).json({message:"you're not logged in"});
   req.user = jwt.verify(token,"asfasdfasdfsad");
-  res.status(200).json({username:req.user.username,email:req.user.email,holdings:req.user.holdings,orders:req.user.orders});
+  res.status(200).json({_id:req.user._id,username:req.user.username,email:req.user.email,holdings:req.user.holdings,orders:req.user.orders});
 });
 app.get('/logout',(req,res)=>{
   res.clearCookie('token',{

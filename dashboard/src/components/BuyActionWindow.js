@@ -23,6 +23,7 @@ const BuyActionWindow = ({ uid }) => {
   const handleBuyClick = async () => {
     try {
       const newOrder = {
+        user : user_info._id,
         name: uid,
         qty: stockQuantity,
         price: stockPrice,

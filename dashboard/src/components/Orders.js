@@ -9,11 +9,11 @@ const Orders = () => {
   const {user_info} = useContext(GeneralContext);
   // Fetch order data from backend
   useEffect(() => {
-    axios.get("http://localhost:3002/allorders").then((res) => {
-      if(!user_info)window.location.href = '/error';
+    if(!user_info)window.location.href = '/error';
+    axios.get("http://localhost:3002/allorders",{withCredentials:true}).then((res) => {
       setOrder(res.data);
     });
-  }, []);
+  },);
 
   return (
     <div className="orders-container">
